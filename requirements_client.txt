@@ -1,0 +1,6 @@
+ursina==6.0.0
+websockets==12.0
+requests==2.31.0  # 更新檢查
+Pillow==10.0.0
+numpy==1.24.3
+pyinstaller==6.4.0  # 打包用

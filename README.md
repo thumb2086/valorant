@@ -1,166 +1,60 @@
-# 特戰英豪風格 FPS 遊戲
+# 🔫 Valorant Desktop - High-Precision FPS
 
-一個基於 Three.js、Node.js 和 Socket.IO 構建的網頁 3D FPS 遊戲原型，靈感來自特戰英豪（Valorant）的核心機制。
+This project is a desktop-based multiplayer FPS game inspired by Valorant, built with Python, Ursina, and websockets. It features a dedicated server, an auto-updater, and a high-precision weapon model generator using Blender.
 
-## 🚀 Quick Start
+## Features
+| Feature                | Status | Details                                      |
+|------------------------|--------|----------------------------------------------|
+| **Desktop Client**     | ✅ EXE | Standalone executable built with PyInstaller.  |
+| **Auto-Updater**       | ✅ Yes | Checks for new versions on GitHub Releases.    |
+| **Multiplayer Server** | ✅ 5v5 | Authoritative server using Python asyncio.   |
+| **High-Precision Models**| ✅ Yes | Generator script for creating detailed weapons.|
+| **Cross-Platform**     | ✅ Yes | Client & server run on Windows, macOS, Linux.|
 
-1. **環境設定:**
-   ```bash
-   cp .env.example .env  # 複製並設定環境變數
-   ```
+---
 
-2. **安裝依賴:**
-   ```bash
-   npm install
-   ```
+## 🚀 For Players
+1.  **Download**: Grab the latest `Valorant.exe` from the [GitHub Releases](https://github.com/thumb2086/valorant/releases) page.
+2.  **Run**: Double-click the executable. It will automatically check for updates and then launch the game.
+3.  **Play**: The game will connect to a default server, or you can modify the IP in `client/main.py` if hosting your own.
 
-3. **開發模式:**
-   ```bash
-   npm run dev  # 使用 nodemon 啟動開發服務器
-   ```
+---
 
-4. **生產環境:**
-   ```bash
-   npm run build  # 打包前端資源
-   npm start      # 啟動服務器
-   ```
+## 🛠️ For Server Hosts
+1.  **Clone the repo**: `git clone https://github.com/thumb2086/valorant.git`
+2.  **Navigate to the server directory**: `cd valorant/server`
+3.  **Install dependencies**: `pip install -r ../requirements_server.txt`
+4.  **Run the server**: `python server.py`
 
-5. **測試:**
-   ```bash
-   npm run test   # 執行單元測試
-   npm run lint   # 執行程式碼檢查
-   ```
+The server will be running on `ws://0.0.0.0:8765`. Make sure to open this port on your firewall if hosting publicly.
 
-## 🎮 功能特色
+---
 
--   **3D 第一人稱控制:** 使用 Three.js 和 PointerLockControls 實現流暢的 3D 渲染和移動。
--   **多種遊戲模式:**
-    -   🎯 **靶場訓練:** 在特戰英豪風格的訓練場中練習射擊技巧。
-    -   🤖 **機器人對戰:** 體驗 5v5 戰術對抗場景。
-    -   🌐 **多人對戰:** 與其他玩家連線，創建或加入房間進行線上對戰。
--   **武器系統:**
-    -   在步槍、手槍和近戰刀之間切換（按鍵 1/2/3）。
-    -   瞄準鏡功能 (ADS) 提供精確射擊。
-    -   重新裝填和彈藥管理系統。
-    -   手槍模型已放大以提供更好的視覺效果。
--   **現代化 UI:** 簡潔實用的選單和遊戲內 HUD 介面。
+## 🔧 For Developers
 
-## 🗺️ 地圖系統
+### Generating Weapon Models
+The high-precision weapon models are generated using a Blender script.
 
--   **特戰英豪訓練場 (`valorant_training`)**
-    -   專為靶場訓練設計，採用特戰英豪風格的視覺設計。
-    -   包含射擊平台、多種類型靶子（頭部靶、身體靶、移動靶）。
-    -   青綠色裝飾條紋和簡潔的牆體設計。
-    -   可配置靶子數量（預設 15 個）。
+1.  **Install Blender**: Download and install Blender 4.2+ from [blender.org](https://blender.org).
+2.  **Run the script**:
+    ```bash
+    # From the model_generator directory
+    cd model_generator
 
--   **Haven - 三點地圖 (`valorant_haven`)**
-    -   模仿特戰英豪 Haven 地圖的三點對戰布局。
-    -   包含 A、B、C 三個爆破點位。
-    -   多層掩體和戰術位置設計。
+    # Run Blender in the background to execute the Python script
+    blender --background --python generate_weapons.py
+    ```
+3.  **Output**: The generated `.glb` models and their textures will be saved to `client/assets/models/weapons/`.
 
--   **Bind - 雙點地圖 (`valorant_bind`)**
-    -   模仿特戰英豪 Bind 地圖的雙點對戰布局。
-    -   包含 A、B 兩個爆破點位。
-    -   特色傳送門系統（青綠色發光效果）。
-    -   戰略通道和掩體配置。
-
-## 🕹️ Controls
-
--   **W/A/S/D:** Move
--   **Mouse:** Look
--   **Spacebar:** Jump
--   **Left Click:** Shoot
--   **Right Click:** Toggle Aim Down Sights (ADS)
--   **R:** Reload
--   **1:** Switch to Rifle
--   **2:** Switch to Pistol
--   **3:** Switch to Knife (Melee)
--   **ESC:** Pause Game / Unlock Mouse
-
-## 🛠️ 項目狀態 (2024年12月更新)
-
-### ✅ 已實現功能
-
--   **核心移動與射擊:** 玩家可以移動、跳躍、環視和射擊。
--   **武器機制:** 武器切換、重新裝填和 ADS 功能正常運作。
--   **遊戲模式:** 靶場訓練、機器人對戰和多人對戰模式均已實現。
--   **多人對戰:** 玩家可以創建房間、加入房間並開始遊戲，玩家位置同步正常。
--   **碰撞檢測:** 基本的地圖碰撞系統防止穿牆。
--   **UI 介面:** 主選單、設定、暫停選單和武器皮膚選擇介面。
--   **特戰英豪風格地圖:** 全新設計的訓練場和對戰地圖，包含特色視覺元素。
--   **武器模型修復:** 解決了步槍貼圖載入問題，手槍尺寸已優化。
--   **武器皮膚系統:** 
-    - 完整的材質生成系統，支援金屬、發光等特效
-    - 蓋亞暴徒皮膚，包含特殊的綠色發光效果
-    - 自定義檢視動畫
-    - 獨特的武器特效（槍口火焰、彈道軌跡）
-
-### 🚧 已知問題與待辦事項
-
--   **多人遊戲邏輯:** 雖然玩家可以連線和移動，但服務器端遊戲狀態邏輯（如回合勝利、血量同步、炸彈安裝）仍需完善。
--   **機器人 AI:** 機器人 AI 較為基礎，可以移動和被射擊，但缺乏高級行為。
--   **音效系統:** 遊戲目前無音效。
--   **視覺優化:** 
-    - 需要更多的粒子效果和撞擊效果
-    - 計劃添加更多特色武器皮膚
-    - 武器檢視動畫可以更加細緻
-
-## 📁 檔案結構
-
-```
-/
-├── index.html          # 主 HTML 檔案
-├── style.css           # 樣式表
-├── server.js           # 主服務器入口
-├── package.json        # 專案配置和依賴
-├── webpack.config.js   # Webpack 打包配置
-├── client/
-│   ├── systems/
-│   │   ├── MapSystem.js      # 地圖系統（特戰英豪風格地圖）
-│   │   ├── WeaponSystem.js   # 武器系統（已修復貼圖問題）
-│   │   ├── BulletSystem.js   # 子彈系統
-│   │   ├── CrosshairSystem.js # 準心系統
-│   │   └── ...
-│   ├── WeaponManager.js
-│   ├── graphics.js     # 圖形初始化
-│   ├── input.js        # 輸入處理
-│   └── network.js      # 網路處理
-├── server/
-│   ├── server.js       # Node.js + Socket.IO 服務器邏輯
-│   ├── game.js         # 服務器端遊戲邏輯
-│   ├── systems/
-│   │   ├── AuthSystem.js     # 認證系統
-│   │   ├── GameState.js      # 遊戲狀態管理
-│   │   └── WeaponSystem.js   # 服務器端武器系統
-│   └── models/
-│       └── User.js     # 用戶模型
-├── configs/
-│   ├── maps.js         # 地圖配置（已更新特戰英豪地圖）
-│   ├── weapons.js      # 武器配置（已調整手槍尺寸）
-│   └── crosshairs.js   # 準心配置
-└── public/
-    ├── assets/
-    │   ├── models/     # 3D 模型檔案
-    │   └── textures/   # 貼圖檔案
-    ├── sounds/         # 音效檔案
-    └── bundle.js       # 打包後的客戶端代碼
-```
-
-## 🔧 技術改進
-
-### 武器系統優化
-- 修復了步槍模型的貼圖載入問題
-- 調整手槍視圖模型尺寸（從 0.085 增加到 0.12）
-- 改進了 GLTF 模型載入器的 URL 修正邏輯
-
-### 地圖系統重構
-- 全面重新設計地圖系統，採用特戰英豪風格
-- 新增三種地圖類型：訓練場、Haven、Bind
-- 實現了移動靶子動畫效果
-- 加入青綠色裝飾條紋和現代化視覺設計
-
-### 多人對戰支援
-- 服務器端遊戲狀態管理
-- 隊伍分配和平衡系統
-- 死亡匹配和回合制模式支援
-- 炸彈安裝/拆除機制基礎架構
+### Building the Client Executable
+1.  **Install client dependencies**:
+    ```bash
+    pip install -r requirements_client.txt
+    ```
+2.  **Run the build script**:
+    -   **Windows**: Run `build_client.bat`.
+    -   **macOS/Linux**: You'll need to create a `build_client.sh` script. The PyInstaller command would be:
+        ```sh
+        pyinstaller --onefile --windowed --name Valorant --add-data "client/assets:assets" client/main.py
+        ```
+3.  **Upload**: After building, a new `Valorant.exe` (or `Valorant` on other OSes) will be in the `dist/` folder. Upload this file to a new release on GitHub to enable the auto-updater for players.
