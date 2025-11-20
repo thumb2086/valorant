@@ -1,24 +1,44 @@
 import React from 'react'
-import { useWeaponStore } from '../store'
+import { useWeaponStore, PartType } from '../store'
+import { translations } from '../i18n/translations'
 
 const FabricationPanel: React.FC = () => {
-    const { params, updateParams } = useWeaponStore()
+    const { params, updateParams, language, selectedPart, setSelectedPart } = useWeaponStore()
+    const t = translations[language]
+
+    const partOptions: PartType[] = ['receiver', 'barrel', 'handguard', 'magazine', 'scope', 'stock', 'grip']
 
     return (
         <div className="p-4 space-y-6 h-full overflow-y-auto">
             <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">
-                Part Fabrication
+                {t.partFabrication}
+            </div>
+
+            {/* Part Type Selector */}
+            <div className="space-y-2">
+                <label className="block text-xs text-gray-400">{t.selectPartType}</label>
+                <select
+                    value={selectedPart}
+                    onChange={(e) => setSelectedPart(e.target.value as PartType)}
+                    className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                >
+                    {partOptions.map(part => (
+                        <option key={part} value={part}>
+                            {t.partTypes[part]}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             {/* Material Settings */}
             <div className="space-y-4">
                 <div className="text-xs text-blue-400 font-bold border-b border-blue-900/30 pb-1">
-                    MATERIAL PARAMETERS
+                    {t.materialParameters.toUpperCase()}
                 </div>
 
                 {/* Color Picker */}
                 <div>
-                    <label className="block text-xs text-gray-400 mb-2">Base Material</label>
+                    <label className="block text-xs text-gray-400 mb-2">{t.baseMaterial}</label>
                     <div className="flex gap-2 flex-wrap">
                         {['#4a5568', '#e53e3e', '#3182ce', '#38a169', '#d69e2e', '#805ad5', '#1a202c', '#cbd5e0'].map((color) => (
                             <button
@@ -35,7 +55,7 @@ const FabricationPanel: React.FC = () => {
                 {/* Metalness Slider */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-300">Metalness</span>
+                        <span className="text-gray-300">{t.metalness}</span>
                         <span className="text-gray-500 font-mono">{(params.metalness * 100).toFixed(0)}%</span>
                     </div>
                     <input
@@ -52,7 +72,7 @@ const FabricationPanel: React.FC = () => {
                 {/* Roughness Slider */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-300">Roughness</span>
+                        <span className="text-gray-300">{t.roughness}</span>
                         <span className="text-gray-500 font-mono">{(params.roughness * 100).toFixed(0)}%</span>
                     </div>
                     <input
@@ -69,7 +89,7 @@ const FabricationPanel: React.FC = () => {
                 {/* Wear Level Slider */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-300">Wear & Tear</span>
+                        <span className="text-gray-300">{t.wearTear}</span>
                         <span className="text-gray-500 font-mono">{(params.wearLevel * 100).toFixed(0)}%</span>
                     </div>
                     <input
@@ -87,13 +107,13 @@ const FabricationPanel: React.FC = () => {
             {/* Geometric Settings */}
             <div className="space-y-4">
                 <div className="text-xs text-blue-400 font-bold border-b border-blue-900/30 pb-1">
-                    GEOMETRY SPECS
+                    {t.geometrySpecs.toUpperCase()}
                 </div>
 
                 {/* Scale Slider */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-300">Global Scale</span>
+                        <span className="text-gray-300">{t.globalScale}</span>
                         <span className="text-gray-500 font-mono">{params.scale.toFixed(2)}x</span>
                     </div>
                     <input
@@ -110,7 +130,7 @@ const FabricationPanel: React.FC = () => {
                 {/* Barrel Length Slider */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-300">Barrel Length</span>
+                        <span className="text-gray-300">{t.barrelLength}</span>
                         <span className="text-gray-500 font-mono">{params.barrelLength.toFixed(2)}u</span>
                     </div>
                     <input
@@ -127,7 +147,7 @@ const FabricationPanel: React.FC = () => {
                 {/* Barrel Diameter Slider */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-300">Barrel Diameter</span>
+                        <span className="text-gray-300">{t.barrelDiameter}</span>
                         <span className="text-gray-500 font-mono">{params.barrelDiameter.toFixed(2)}u</span>
                     </div>
                     <input
@@ -144,7 +164,7 @@ const FabricationPanel: React.FC = () => {
                 {/* Grip Size Slider */}
                 <div>
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-300">Grip Ergonomics</span>
+                        <span className="text-gray-300">{t.gripErgonomics}</span>
                         <span className="text-gray-500 font-mono">{params.gripSize.toFixed(2)}u</span>
                     </div>
                     <input
@@ -160,7 +180,7 @@ const FabricationPanel: React.FC = () => {
 
                 {/* Rail System Toggle */}
                 <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-300">Tactical Rail System</span>
+                    <span className="text-xs text-gray-300">{t.tacticalRailSystem}</span>
                     <button
                         onClick={() => updateParams({ railSystem: !params.railSystem })}
                         className={`w-10 h-5 rounded-full transition-colors relative ${params.railSystem ? 'bg-blue-600' : 'bg-gray-700'
@@ -173,8 +193,17 @@ const FabricationPanel: React.FC = () => {
             </div>
 
             <div className="pt-4">
-                <button className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold tracking-wider rounded transition-colors">
-                    FABRICATE PART
+                <button
+                    onClick={() => {
+                        // When user clicks "Fabricate Part", we switch to Assembly tab to see the result
+                        // In a full implementation, this would save the part to inventory
+                        console.log(`製造零件: ${t.partTypes[selectedPart]}`, params)
+                        // For now, just log that we're fabricating this part
+                        alert(`✅ 已製造: ${t.partTypes[selectedPart]}\n\n這個功能將在零件庫系統完成後保存零件。\n目前可以在組裝標籤中查看完整武器。`)
+                    }}
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold tracking-wider rounded transition-colors"
+                >
+                    {t.fabricatePart.toUpperCase()}
                 </button>
             </div>
         </div>

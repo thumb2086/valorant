@@ -1,6 +1,10 @@
 import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { GameServer } from './server'
+
+// Initialize UDP Game Server
+const gameServer = new GameServer(41234)
 
 function createWindow(): void {
     const mainWindow = new BrowserWindow({
@@ -39,6 +43,10 @@ app.whenReady().then(() => {
         optimizer.watchWindowShortcuts(window)
     })
 
+    // Start the UDP game server
+    console.log('[Protocol: Zero] Starting Game Server...')
+    gameServer.start()
+
     createWindow()
 
     app.on('activate', () => {
@@ -47,6 +55,9 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', () => {
+    console.log('[Protocol: Zero] Stopping Game Server...')
+    gameServer.stop()
+
     if (process.platform !== 'darwin') {
         app.quit()
     }

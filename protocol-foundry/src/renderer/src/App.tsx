@@ -4,19 +4,39 @@ import Scene from './components/Scene'
 import FabricationPanel from './components/FabricationPanel'
 import AssemblyPanel from './components/AssemblyPanel'
 import ExportPanel from './components/ExportPanel'
-import { useWeaponStore, WeaponType } from './store'
+import { useWeaponStore } from './store'
+import { translations } from './i18n/translations'
 
 type Tab = 'fabrication' | 'assembly' | 'export'
 
 function App(): JSX.Element {
-    const [activeTab, setActiveTab] = useState<Tab>('assembly')
+    const [activeTab, setActiveTab] = useState<Tab>('fabrication')
+    const { language, setLanguage } = useWeaponStore()
+    const t = translations[language]
 
     return (
-        <div className="flex h-screen w-screen bg-gray-900 text-white overflow-hidden font-sans">
+        <div className="flex h-screen w-screen bg-gray-900 text-white overflow-hidden">
             {/* Left Panel: Editor */}
             <div className="w-1/3 border-r border-gray-700 flex flex-col">
-                <div className="h-10 flex items-center px-4 bg-gray-800 border-b border-gray-700">
-                    <span className="text-xs font-bold text-gray-400 tracking-wider">PROTOCOL EDITOR</span>
+                <div className="p-2 bg-gray-800 font-bold text-sm border-b border-gray-700 flex justify-between items-center">
+                    <span>{t.protocolEditor.toUpperCase()}</span>
+                    {/* Language Switcher */}
+                    <div className="flex gap-1">
+                        <button
+                            onClick={() => setLanguage('zh-TW')}
+                            className={`px-2 py-1 text-xs rounded transition-colors ${language === 'zh-TW' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                                }`}
+                        >
+                            中文
+                        </button>
+                        <button
+                            onClick={() => setLanguage('en-US')}
+                            className={`px-2 py-1 text-xs rounded transition-colors ${language === 'en-US' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                                }`}
+                        >
+                            EN
+                        </button>
+                    </div>
                 </div>
                 <div className="flex-1 relative">
                     <Editor />
@@ -28,7 +48,7 @@ function App(): JSX.Element {
                 <Scene />
                 <div className="absolute top-4 left-4 pointer-events-none">
                     <div className="text-xs font-bold text-gray-500 tracking-widest">PROTOCOL: FOUNDRY</div>
-                    <div className="text-[10px] text-gray-600 mt-1">V.1.0.0 // PREVIEW</div>
+                    <div className="text-[10px] text-gray-600 mt-1">V.1.0.0 // {t.scenePreview.toUpperCase()}</div>
                 </div>
             </div>
 
@@ -43,7 +63,7 @@ function App(): JSX.Element {
                                 : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700'
                             }`}
                     >
-                        FABRICATE
+                        {t.tabFabrication.toUpperCase()}
                     </button>
                     <button
                         onClick={() => setActiveTab('assembly')}
@@ -52,7 +72,7 @@ function App(): JSX.Element {
                                 : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700'
                             }`}
                     >
-                        ASSEMBLE
+                        {t.tabAssembly.toUpperCase()}
                     </button>
                     <button
                         onClick={() => setActiveTab('export')}
@@ -61,7 +81,7 @@ function App(): JSX.Element {
                                 : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700'
                             }`}
                     >
-                        EXPORT
+                        {t.tabExport.toUpperCase()}
                     </button>
                 </div>
 

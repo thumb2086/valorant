@@ -1,6 +1,8 @@
 import { create } from 'zustand'
+import { Language } from './i18n/translations'
 
 export type WeaponType = 'knife' | 'pistol' | 'rifle'
+export type PartType = 'receiver' | 'barrel' | 'handguard' | 'magazine' | 'scope' | 'stock' | 'grip'
 
 export interface WeaponParams {
     // Basic
@@ -24,9 +26,13 @@ export interface WeaponStore {
     weaponType: WeaponType
     params: WeaponParams
     explodedViewDistance: number
+    language: Language
+    selectedPart: PartType
     setWeaponType: (type: WeaponType) => void
     updateParams: (params: Partial<WeaponParams>) => void
     setExplodedViewDistance: (dist: number) => void
+    setLanguage: (lang: Language) => void
+    setSelectedPart: (part: PartType) => void
 }
 
 export const useWeaponStore = create<WeaponStore>((set) => ({
@@ -44,7 +50,11 @@ export const useWeaponStore = create<WeaponStore>((set) => ({
         wearLevel: 0.1
     },
     explodedViewDistance: 0,
+    language: 'zh-TW' as Language,
+    selectedPart: 'receiver' as PartType,
     setWeaponType: (type) => set({ weaponType: type }),
     updateParams: (newParams) => set((state) => ({ params: { ...state.params, ...newParams } })),
-    setExplodedViewDistance: (dist) => set({ explodedViewDistance: dist })
+    setExplodedViewDistance: (dist) => set({ explodedViewDistance: dist }),
+    setLanguage: (lang) => set({ language: lang }),
+    setSelectedPart: (part) => set({ selectedPart: part })
 }))

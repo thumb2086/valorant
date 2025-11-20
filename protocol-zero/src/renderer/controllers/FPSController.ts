@@ -1,4 +1,4 @@
-import { Scene, UniversalCamera, Vector3, ActionManager, KeyboardEventTypes, Axis, Ray, Color3, MeshBuilder, StandardMaterial } from '@babylonjs/core'
+import { Scene, UniversalCamera, Vector3, ActionManager, KeyboardEventTypes, Axis, Ray, Color3, MeshBuilder, StandardMaterial, Mesh } from '@babylonjs/core'
 
 export class FPSController {
     private scene: Scene
@@ -11,6 +11,9 @@ export class FPSController {
     private canvas: HTMLCanvasElement
     private isLocked: boolean = false
 
+    // Weapon attachment
+    public weaponAttachPoint: Mesh | null = null
+
     constructor(scene: Scene, startPosition: Vector3) {
         this.scene = scene
         this.canvas = scene.getEngine().getRenderingCanvas() as HTMLCanvasElement
@@ -20,9 +23,11 @@ export class FPSController {
         this.camera.setTarget(new Vector3(0, 1.6, 0)) // Eye-level height
         this.camera.attachControl(this.canvas, true)
 
-        // Mouse sensitivity
+        // Mouse sensitivity & FPS settings
         this.camera.angularSensibility = 1000
         this.camera.speed = 0
+        this.camera.fov = 1.2 // Wide FOV like Valorant
+        this.camera.minZ = 0.01 // Very close near plane for weapon
 
         // Collision & Gravity
         this.camera.checkCollisions = true
@@ -65,7 +70,7 @@ export class FPSController {
     private setupKeyboardInput() {
         this.scene.actionManager = new ActionManager(this.scene)
 
-        // Key Down
+        // Key Down/Up
         this.scene.onKeyboardObservable.add((kbInfo) => {
             if (kbInfo.type === KeyboardEventTypes.KEYDOWN) {
                 this.inputMap[kbInfo.event.key.toLowerCase()] = true
@@ -74,6 +79,27 @@ export class FPSController {
                 this.inputMap[kbInfo.event.key.toLowerCase()] = false
             }
         })
+    }
+
+    /**
+     * Attach weapon to camera for first-person view
+     */
+    public attachWeapon(weaponMesh: Mesh): void {
+        // Create weapon attach point if not exists
+        if (!this.weaponAttachPoint) {
+            this.weaponAttachPoint = new Mesh('weaponAttachPoint', this.scene)
+            this.weaponAttachPoint.parent = this.camera
+
+            // Position in front of camera (right hand position)
+            this.weaponAttachPoint.position = new Vector3(0.3, -0.25, 0.6)
+            this.weaponAttachPoint.rotation = new Vector3(0, Math.PI, 0)
+        }
+
+        // Attach weapon
+        weaponMesh.parent = this.weaponAttachPoint
+        weaponMesh.position = Vector3.Zero()
+        weaponMesh.rotation = Vector3.Zero()
+        weaponMesh.scaling = new Vector3(0.2, 0.2, 0.2) // Scale down for FP view
     }
 
     public update() {
@@ -100,10 +126,9 @@ export class FPSController {
         movement.y = 0
         this.camera.position.addInPlace(movement)
 
-        // Gravity and Jumping
-        // Apply gravity
+        // Gravity
         if (!this.grounded) {
-            this.velocity.y -= 0.015 // Gravity
+            this.velocity.y -= 0.015
         }
 
         // Jump
@@ -126,8 +151,6 @@ export class FPSController {
     }
 
     public setSensitivity(sensitivity: number) {
-        // BabylonJS angularSensibility is inverse (higher = slower)
-        // Base 1000. Sensitivity 1.0 -> 1000. Sensitivity 2.0 -> 500.
         this.camera.angularSensibility = 2000 / sensitivity
     }
 
@@ -141,9 +164,7 @@ export class FPSController {
         const ray = new Ray(origin, direction, 100)
         const hit = this.scene.pickWithRay(ray)
 
-        // Visual: Bullet Trail (Line)
-        // Offset start to look like coming from right side (gun position)
-        // We need to calculate world position of the gun muzzle offset
+        // Visual: Bullet Trail
         const right = this.camera.getDirection(Axis.X).scale(0.2)
         const down = this.camera.getDirection(Axis.Y).scale(-0.2)
         const forward = this.camera.getDirection(Axis.Z).scale(0.5)
@@ -165,7 +186,7 @@ export class FPSController {
         if (hit?.pickedMesh) {
             console.log('Hit:', hit.pickedMesh.name)
 
-            // Visual: Hit Marker (Sphere)
+            // Visual: Hit Marker
             const marker = MeshBuilder.CreateSphere('hit', { diameter: 0.1 }, this.scene)
             marker.position = hit.pickedPoint!
             const mat = new StandardMaterial('hitMat', this.scene)

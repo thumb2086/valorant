@@ -1,83 +1,130 @@
-import { Engine, Scene, Vector3, HemisphericLight, Color4 } from '@babylonjs/core'
+import {
+    Engine,
+    Scene,
+    Vector3,
+    HemisphericLight,
+    Color4
+} from '@babylonjs/core'
 import { CharacterGenerator } from '../generators/CharacterGenerator'
 import { WeaponAssembler } from '../generators/WeaponAssembler'
 import { FPSController } from '../controllers/FPSController'
+import { MapGenerator } from '../generators/MapGenerator'
 
-console.log('Renderer process started')
+console.log('Protocol: Zero - Renderer Process Started')
 
-try {
-    const canvas = document.getElementById('renderCanvas') as HTMLCanvasElement
-    if (!canvas) throw new Error('Canvas not found')
+async function initGame() {
+    try {
+        const canvas = document.getElementById('renderCanvas') as HTMLCanvasElement
+        if (!canvas) throw new Error('Canvas not found')
 
-    const engine = new Engine(canvas, true)
-    console.log('Engine initialized')
+        console.log('[Phase 1] Initializing Engine...')
 
-    const createScene = () => {
-        const scene = new Scene(engine)
-        scene.clearColor = new Color4(0.1, 0.1, 0.15, 1) // Dark Navy
+        // Initialize Engine
+        const engine = new Engine(canvas, true, {
+            adaptToDeviceRatio: true,
+            powerPreference: 'high-performance'
+        })
+        console.log('✓ Engine initialized')
 
-        // FPS Controller (First Person Camera)
-        const fpsController = new FPSController(scene, new Vector3(0, 1.6, -5))
-        fpsController.setSensitivity(1.5) // Default sensitivity
+        const createScene = () => {
+            const scene = new Scene(engine)
+            scene.clearColor = new Color4(0.02, 0.02, 0.05, 1) // Darker background
 
-        // Light
-        const light = new HemisphericLight('light1', new Vector3(0, 1, 0), scene)
-        light.intensity = 0.7
+            // FPS Controller
+            const fpsController = new FPSController(scene, new Vector3(0, 1.6, -10))
+            fpsController.setSensitivity(1.5)
 
-        // Generate Character (World)
-        console.log('Generating character...')
-        const charGen = new CharacterGenerator(scene)
-        charGen.generateVector(new Vector3(0, 0, 0))
-        console.log('Character generated')
+            // Generate The Range Map
+            const mapGen = new MapGenerator(scene)
+            mapGen.generateTheRange()
+            console.log('✓ Map loaded: The Range')
 
-        // Generate Weapons (Showcase in World)
-        const weaponGen = new WeaponAssembler(scene)
+            // Lighting (Darker cyberpunk atmosphere)
+            const light = new HemisphericLight('light1', new Vector3(0, 1, 0), scene)
+            light.intensity = 0.4 // Much darker ambient
 
-        // Showcase Skins (Moved back to avoid confusion)
-        const gaia = weaponGen.generateVandal(new Vector3(-3, 1, 5), 'gaia')
-        gaia.rotation.y = Math.PI / 2
+            const light2 = new HemisphericLight('light2', new Vector3(1, 2, 1), scene)
+            light2.intensity = 0.3 // Subtle fill light
 
-        const flux = weaponGen.generateVandal(new Vector3(0, 1, 5), 'flux')
-        flux.rotation.y = Math.PI / 2
+            // Characters (Far away for showcase)
+            console.log('Generating characters...')
+            const charGen = new CharacterGenerator(scene)
+            charGen.generateVector(new Vector3(10, 0, 35))
+            charGen.generateBastion(new Vector3(14, 0, 35))
+            charGen.generateNebula(new Vector3(18, 0, 35))
+            charGen.generatePulse(new Vector3(22, 0, 35))
+            console.log('✓ All 4 characters generated')
 
+            // Held Weapon
+            const weaponGen = new WeaponAssembler(scene)
+            const heldWeapon = weaponGen.generateVandal(Vector3.Zero(), 'flux')
+            fpsController.attachWeapon(heldWeapon)
+            console.log('✓ Weapon attached')
 
-        // UI hint management
-        const uiHint = document.getElementById('ui-hint')
-        const settingsPanel = document.getElementById('settings-panel')
-        const crosshair = document.getElementById('crosshair')
-        const sensitivitySlider = document.getElementById('sensitivity-slider') as HTMLInputElement
-        const sensitivityValue = document.getElementById('sensitivity-value')
+            // Weapon Showcase
+            const gaia = weaponGen.generateVandal(new Vector3(-5, 1.2, 25), 'gaia')
+            gaia.rotation.y = Math.PI / 2
 
-        // Sensitivity Control
-        if (sensitivitySlider && sensitivityValue) {
-            sensitivitySlider.addEventListener('input', (e) => {
-                const val = parseFloat((e.target as HTMLInputElement).value)
-                fpsController.setSensitivity(val)
-                sensitivityValue.innerText = val.toFixed(1)
+            // UI Management
+            const uiHint = document.getElementById('ui-hint')
+            const settingsPanel = document.getElementById('settings-panel')
+            const crosshair = document.getElementById('crosshair')
+            const sensitivitySlider = document.getElementById('sensitivity-slider') as HTMLInputElement
+            const sensitivityValue = document.getElementById('sensitivity-value')
+
+            // Sensitivity Control
+            if (sensitivitySlider && sensitivityValue) {
+                sensitivitySlider.addEventListener('input', (e) => {
+                    const val = parseFloat((e.target as HTMLInputElement).value)
+                    fpsController.setSensitivity(val)
+                    sensitivityValue.innerText = val.toFixed(1)
+                })
+            }
+
+            // Pointer Lock Events
+            document.addEventListener('pointerlockchange', () => {
+                if (document.pointerLockElement) {
+                    if (uiHint) uiHint.style.display = 'none'
+                    if (settingsPanel) settingsPanel.style.display = 'none'
+                    if (crosshair) crosshair.style.display = 'block'
+                } else {
+                    if (uiHint) uiHint.style.display = 'block'
+                    if (settingsPanel) settingsPanel.style.display = 'block'
+                    if (crosshair) crosshair.style.display = 'none'
+                }
             })
+
+            // Render Loop
+            engine.runRenderLoop(() => {
+                fpsController.update()
+                scene.render()
+            })
+
+            // Resize Handler
+            window.addEventListener('resize', () => {
+                engine.resize()
+            })
+
+            console.log('✓ Scene initialized')
+            console.log('=================================')
+            console.log('MAP:', '🗺️  The Range (Training)')
+            console.log('VIEW:', '👁️  First-Person')
+            console.log('WEAPON:', '🔫 Flux Vandal')
+            console.log('=================================')
+
+            return scene
         }
 
-        document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement) {
-                if (uiHint) uiHint.style.display = 'none'
-                if (settingsPanel) settingsPanel.style.display = 'none'
-                if (crosshair) crosshair.style.display = 'block'
-            } else {
-                if (uiHint) uiHint.style.display = 'block'
-                if (settingsPanel) settingsPanel.style.display = 'block'
-                if (crosshair) crosshair.style.display = 'none'
-            }
-        })
-
-        engine.runRenderLoop(() => {
-            fpsController.update()
-            scene.render()
-        })
-
-        window.addEventListener('resize', () => {
-            engine.resize()
-        })
+        createScene()
     } catch (err) {
-        console.error('Fatal Error:', err)
-        document.body.innerHTML = `<div style="color:red; padding:20px;"><h1>Fatal Error</h1><pre>${err}</pre></div>`
+        console.error('❌ Fatal Error:', err)
+        document.body.innerHTML = `<div style="color:red; padding:20px; font-family: monospace;">
+            <h1>🚫 Protocol: Zero - Initialization Failed</h1>
+            <pre>${err}</pre>
+            <p>Please check the console for details.</p>
+        </div>`
     }
+}
+
+// Start the game
+initGame()
