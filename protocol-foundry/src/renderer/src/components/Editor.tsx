@@ -1,5 +1,9 @@
-import React from 'react'
-import MonacoEditor from '@monaco-editor/react'
+import React, { useEffect } from 'react'
+import MonacoEditor, { loader } from '@monaco-editor/react'
+import * as monaco from 'monaco-editor'
+
+// Configure loader to use the locally installed monaco-editor
+loader.config({ monaco })
 
 const Editor: React.FC = () => {
     const handleEditorChange = (value: string | undefined) => {

@@ -1,23 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Editor from './components/Editor'
 import Scene from './components/Scene'
+import FabricationPanel from './components/FabricationPanel'
+import AssemblyPanel from './components/AssemblyPanel'
+import ExportPanel from './components/ExportPanel'
 import { useWeaponStore, WeaponType } from './store'
 
-function App(): JSX.Element {
-    const { weaponType, setWeaponType } = useWeaponStore()
+type Tab = 'fabrication' | 'assembly' | 'export'
 
-    const weaponButtons: { type: WeaponType; label: string }[] = [
-        { type: 'knife', label: 'KNIFE' },
-        { type: 'pistol', label: 'PISTOL' },
-        { type: 'rifle', label: 'RIFLE' }
-    ]
+function App(): JSX.Element {
+    const [activeTab, setActiveTab] = useState<Tab>('assembly')
 
     return (
-        <div className="flex h-screen w-screen bg-gray-900 text-white overflow-hidden">
+        <div className="flex h-screen w-screen bg-gray-900 text-white overflow-hidden font-sans">
             {/* Left Panel: Editor */}
             <div className="w-1/3 border-r border-gray-700 flex flex-col">
-                <div className="p-2 bg-gray-800 font-bold text-sm border-b border-gray-700">
-                    SCRIPT EDITOR
+                <div className="h-10 flex items-center px-4 bg-gray-800 border-b border-gray-700">
+                    <span className="text-xs font-bold text-gray-400 tracking-wider">PROTOCOL EDITOR</span>
                 </div>
                 <div className="flex-1 relative">
                     <Editor />
@@ -27,53 +26,59 @@ function App(): JSX.Element {
             {/* Center Panel: 3D Scene */}
             <div className="flex-1 relative bg-black">
                 <Scene />
-                <div className="absolute top-4 left-4 text-xs text-gray-500 pointer-events-none">
-                    PROTOCOL: FOUNDRY // PREVIEW
+                <div className="absolute top-4 left-4 pointer-events-none">
+                    <div className="text-xs font-bold text-gray-500 tracking-widest">PROTOCOL: FOUNDRY</div>
+                    <div className="text-[10px] text-gray-600 mt-1">V.1.0.0 // PREVIEW</div>
                 </div>
             </div>
 
-            {/* Right Panel: Inspector */}
-            <div className="w-1/4 border-l border-gray-700 flex flex-col bg-gray-800">
-                <div className="p-2 bg-gray-800 font-bold text-sm border-b border-gray-700">
-                    INSPECTOR
+            {/* Right Panel: Inspector & Controls */}
+            <div className="w-80 border-l border-gray-700 flex flex-col bg-gray-900">
+                {/* Tab Navigation */}
+                <div className="flex border-b border-gray-700 bg-gray-800">
+                    <button
+                        onClick={() => setActiveTab('fabrication')}
+                        className={`flex-1 py-3 text-[10px] font-bold tracking-wider transition-colors ${activeTab === 'fabrication'
+                                ? 'text-blue-400 border-b-2 border-blue-400 bg-gray-800'
+                                : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700'
+                            }`}
+                    >
+                        FABRICATE
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('assembly')}
+                        className={`flex-1 py-3 text-[10px] font-bold tracking-wider transition-colors ${activeTab === 'assembly'
+                                ? 'text-blue-400 border-b-2 border-blue-400 bg-gray-800'
+                                : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700'
+                            }`}
+                    >
+                        ASSEMBLE
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('export')}
+                        className={`flex-1 py-3 text-[10px] font-bold tracking-wider transition-colors ${activeTab === 'export'
+                                ? 'text-blue-400 border-b-2 border-blue-400 bg-gray-800'
+                                : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700'
+                            }`}
+                    >
+                        EXPORT
+                    </button>
                 </div>
-                <div className="p-4 space-y-4">
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1">STATUS</label>
-                        <div className="text-green-400 text-sm">● SYSTEM ONLINE</div>
-                    </div>
 
-                    {/* Weapon Type Selector */}
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-2">WEAPON TYPE</label>
-                        <div className="space-y-2">
-                            {weaponButtons.map(({ type, label }) => (
-                                <button
-                                    key={type}
-                                    onClick={() => setWeaponType(type)}
-                                    className={`w-full px-4 py-2 text-sm font-mono transition-all ${weaponType === type
-                                        ? 'bg-blue-600 text-white border-blue-400'
-                                        : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
-                                        } border rounded`}
-                                >
-                                    {label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                {/* Panel Content */}
+                <div className="flex-1 overflow-hidden bg-gray-900">
+                    {activeTab === 'fabrication' && <FabricationPanel />}
+                    {activeTab === 'assembly' && <AssemblyPanel />}
+                    {activeTab === 'export' && <ExportPanel />}
+                </div>
 
-                    {/* Current Weapon Display */}
-                    <div>
-                        <label className="block text-xs text-gray-400 mb-1">ACTIVE WEAPON</label>
-                        <div className="text-blue-400 text-sm font-mono uppercase">
-                            {weaponType}
-                        </div>
+                {/* Status Footer */}
+                <div className="h-8 border-t border-gray-700 bg-gray-800 flex items-center justify-between px-4 text-[10px] text-gray-500">
+                    <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                        <span>SYSTEM ONLINE</span>
                     </div>
-
-                    {/* Placeholder */}
-                    <div className="p-4 border border-dashed border-gray-600 rounded opacity-50 text-center text-xs">
-                        CUSTOMIZATION CONTROLS COMING SOON
-                    </div>
+                    <span>UNKNOWN USER</span>
                 </div>
             </div>
         </div>

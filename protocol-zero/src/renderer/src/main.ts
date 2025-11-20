@@ -18,53 +18,66 @@ try {
 
         // FPS Controller (First Person Camera)
         const fpsController = new FPSController(scene, new Vector3(0, 1.6, -5))
+        fpsController.setSensitivity(1.5) // Default sensitivity
 
         // Light
         const light = new HemisphericLight('light1', new Vector3(0, 1, 0), scene)
         light.intensity = 0.7
 
-        // Generate Character
+        // Generate Character (World)
         console.log('Generating character...')
         const charGen = new CharacterGenerator(scene)
         charGen.generateVector(new Vector3(0, 0, 0))
         console.log('Character generated')
 
-        // Generate Weapons (Showcase)
+        // Generate Weapons (Showcase in World)
         const weaponGen = new WeaponAssembler(scene)
 
-        const classic = weaponGen.generateClassic(new Vector3(-2, 1, 0))
-        classic.rotation.y = Math.PI / 2
+        // Showcase Skins (Moved back to avoid confusion)
+        const gaia = weaponGen.generateVandal(new Vector3(-3, 1, 5), 'gaia')
+        gaia.rotation.y = Math.PI / 2
 
-        const vandal = weaponGen.generateVandal(new Vector3(2, 1, 0))
-        vandal.rotation.y = -Math.PI / 2
+        const flux = weaponGen.generateVandal(new Vector3(0, 1, 5), 'flux')
+        flux.rotation.y = Math.PI / 2
 
-        const phantom = weaponGen.generatePhantom(new Vector3(2, 1, 2))
-        phantom.rotation.y = -Math.PI / 2
 
-        return { scene, fpsController }
-    }
+        // UI hint management
+        const uiHint = document.getElementById('ui-hint')
+        const settingsPanel = document.getElementById('settings-panel')
+        const crosshair = document.getElementById('crosshair')
+        const sensitivitySlider = document.getElementById('sensitivity-slider') as HTMLInputElement
+        const sensitivityValue = document.getElementById('sensitivity-value')
 
-    const { scene, fpsController } = createScene()
-
-    // UI hint management
-    const uiHint = document.getElementById('ui-hint')
-    document.addEventListener('pointerlockchange', () => {
-        if (document.pointerLockElement) {
-            if (uiHint) uiHint.style.display = 'none'
-        } else {
-            if (uiHint) uiHint.style.display = 'block'
+        // Sensitivity Control
+        if (sensitivitySlider && sensitivityValue) {
+            sensitivitySlider.addEventListener('input', (e) => {
+                const val = parseFloat((e.target as HTMLInputElement).value)
+                fpsController.setSensitivity(val)
+                sensitivityValue.innerText = val.toFixed(1)
+            })
         }
-    })
 
-    engine.runRenderLoop(() => {
-        fpsController.update()
-        scene.render()
-    })
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement) {
+                if (uiHint) uiHint.style.display = 'none'
+                if (settingsPanel) settingsPanel.style.display = 'none'
+                if (crosshair) crosshair.style.display = 'block'
+            } else {
+                if (uiHint) uiHint.style.display = 'block'
+                if (settingsPanel) settingsPanel.style.display = 'block'
+                if (crosshair) crosshair.style.display = 'none'
+            }
+        })
 
-    window.addEventListener('resize', () => {
-        engine.resize()
-    })
-} catch (err) {
-    console.error('Fatal Error:', err)
-    document.body.innerHTML = `<div style="color:red; padding:20px;"><h1>Fatal Error</h1><pre>${err}</pre></div>`
-}
+        engine.runRenderLoop(() => {
+            fpsController.update()
+            scene.render()
+        })
+
+        window.addEventListener('resize', () => {
+            engine.resize()
+        })
+    } catch (err) {
+        console.error('Fatal Error:', err)
+        document.body.innerHTML = `<div style="color:red; padding:20px;"><h1>Fatal Error</h1><pre>${err}</pre></div>`
+    }

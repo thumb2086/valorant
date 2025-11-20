@@ -5,15 +5,16 @@ import {
     Vector3,
     HemisphericLight,
     ArcRotateCamera,
-    Color4
+    Color4,
+    Color3
 } from '@babylonjs/core'
-import { WeaponGenerator } from '../utils/WeaponGenerator'
+import { WeaponAssembler } from '../utils/WeaponAssembler'
 import { useWeaponStore } from '../store'
 
 const Scene: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const weaponGeneratorRef = useRef<WeaponGenerator | null>(null)
-    const weaponType = useWeaponStore((state) => state.weaponType)
+    const weaponAssemblerRef = useRef<WeaponAssembler | null>(null)
+    const { weaponType, params, explodedViewDistance } = useWeaponStore()
 
     useEffect(() => {
         if (!canvasRef.current) return
@@ -21,17 +22,26 @@ const Scene: React.FC = () => {
         const engine = new Engine(canvasRef.current, true)
         const scene = new BabylonScene(engine)
 
-        scene.clearColor = new Color4(0.05, 0.05, 0.05, 1)
+        // Lighter background for better contrast
+        scene.clearColor = new Color4(0.12, 0.12, 0.15, 1)
 
         const camera = new ArcRotateCamera('camera1', -Math.PI / 2, Math.PI / 2.5, 3, Vector3.Zero(), scene)
         camera.attachControl(canvasRef.current, true)
+        camera.wheelPrecision = 50 // Slower zoom for better control
 
+        // Main ambient light - increased intensity
         const light = new HemisphericLight('light1', new Vector3(0, 1, 0), scene)
-        light.intensity = 0.7
+        light.intensity = 0.8
+        light.groundColor = new Color3(0.2, 0.2, 0.2) // Add some ground reflection
 
-        // Initialize weapon generator
-        weaponGeneratorRef.current = new WeaponGenerator(scene)
-        weaponGeneratorRef.current.generateWeapon(weaponType)
+        // Add a directional light for better definition and highlights
+        const dirLight = new HemisphericLight('light2', new Vector3(1, 0.5, -1), scene)
+        dirLight.intensity = 0.5
+        dirLight.specular = new Color3(1, 1, 1)
+
+        // Initialize weapon assembler
+        weaponAssemblerRef.current = new WeaponAssembler(scene)
+        weaponAssemblerRef.current.assemble(weaponType, params, explodedViewDistance)
 
         engine.runRenderLoop(() => {
             scene.render()
@@ -45,17 +55,17 @@ const Scene: React.FC = () => {
 
         return () => {
             window.removeEventListener('resize', handleResize)
-            weaponGeneratorRef.current?.dispose()
+            weaponAssemblerRef.current?.dispose()
             engine.dispose()
         }
     }, [])
 
-    // Update weapon when type changes
+    // Update weapon when type, params, or exploded view changes
     useEffect(() => {
-        if (weaponGeneratorRef.current) {
-            weaponGeneratorRef.current.generateWeapon(weaponType)
+        if (weaponAssemblerRef.current) {
+            weaponAssemblerRef.current.assemble(weaponType, params, explodedViewDistance)
         }
-    }, [weaponType])
+    }, [weaponType, params, explodedViewDistance])
 
     return <canvas ref={canvasRef} className="w-full h-full outline-none" />
 }
